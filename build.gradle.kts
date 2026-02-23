@@ -78,4 +78,17 @@ tasks.test {
 
 tasks.jacocoTestReport {
     dependsOn(tasks.test)
+    reports {
+        xml.required.set(true)
+        html.required.set(true)
+    }
+}
+
+sonar {
+    properties {
+        property("sonar.projectKey", "b-clairine-christabel-lim-2406359941_eshop")
+        property("sonar.organization", "b-clairine-christabel-lim-2406359941")
+        property("sonar.host.url", "https://sonarcloud.io")
+        property("sonar.coverage.jacoco.xmlReportPaths", "build/reports/jacoco/test/xml/jacocoTestReport.xml")
+    }
 }
