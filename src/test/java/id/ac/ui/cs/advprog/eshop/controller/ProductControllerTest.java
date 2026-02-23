@@ -72,7 +72,7 @@ class ProductControllerTest {
 
         mockMvc.perform(get("/product/edit/" + product.getProductId()))
                 .andExpect(status().isOk())
-                .andExpect(view().name("EditProduct"))
+                .andExpect(view().name("editProduct"))
                 .andExpect(model().attribute("product", product));
     }
 
