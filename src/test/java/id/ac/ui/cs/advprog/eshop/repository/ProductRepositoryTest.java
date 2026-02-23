@@ -137,4 +137,43 @@ class ProductRepositoryTest {
         Iterator<Product> productIterator = productRepository.findAll();
         assertTrue(productIterator.hasNext());
     }
+
+    @Test
+    void testCreateWithoutId() {
+        Product product = new Product();
+        product.setProductName("Sampo Tanpa ID");
+        product.setProductQuantity(10);
+
+        // Mengetes skenario di mana ID null, harus men-generate UUID
+        Product createdProduct = productRepository.create(product);
+
+        assertNotNull(createdProduct.getProductId());
+        assertFalse(createdProduct.getProductId().isEmpty());
+    }
+
+    @Test
+    void testFindByIdPositive() {
+        Product product = new Product();
+        product.setProductId("eb558e9f-1c39-460e-8860-71af6af63bd6");
+        product.setProductName("Sampo Cap Bambang");
+        productRepository.create(product);
+
+        Product foundProduct = productRepository.findById("eb558e9f-1c39-460e-8860-71af6af63bd6");
+
+        assertNotNull(foundProduct);
+        assertEquals(product.getProductId(), foundProduct.getProductId());
+        assertEquals(product.getProductName(), foundProduct.getProductName());
+    }
+
+    @Test
+    void testFindByIdNegative() {
+        Product product = new Product();
+        product.setProductId("eb558e9f-1c39-460e-8860-71af6af63bd6");
+        productRepository.create(product);
+
+        // Mengetes skenario ID tidak ditemukan (agar baris 'return null' tereksekusi)
+        Product foundProduct = productRepository.findById("non-existent-id");
+
+        assertNull(foundProduct);
+    }
 }
