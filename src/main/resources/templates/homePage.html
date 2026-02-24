@@ -3,8 +3,14 @@
 <head>
   <meta charset="UTF-8">
   <title>ADV Shop</title>
+  <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body>
-<h3>Welcome</h3>
+<body class="container mt-5">
+<div class="jumbotron text-center">
+  <h3 class="display-4">Welcome to ADV Shop</h3>
+  <p class="lead">Manage your products easily and efficiently.</p>
+  <hr class="my-4">
+  <a th:href="@{/product/list}" class="btn btn-primary btn-lg">Check Product List</a>
+</div>
 </body>
 </html>
