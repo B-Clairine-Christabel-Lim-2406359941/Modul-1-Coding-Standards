@@ -60,3 +60,28 @@ Masalah *clean code* yang terjadi adalah **Code Duplication** dan pelanggaran pr
 
 ### 2. CI/CD Workflows Assessment
    Berdasarkan implementasi yang telah dilakukan, saya yakin bahwa alur kerja saat ini telah sepenuhnya memenuhi definisi Continuous Integration (CI) dan Continuous Deployment (CD). Setiap kali saya melakukan push kode ke repositori, GitHub Actions secara otomatis menjalankan rangkaian unit tes dan analisis statis melalui SonarCloud untuk memvalidasi kualitas kode secara instan. Proses otomatisasi ini memastikan bahwa hanya kode yang benar-benar stabil dan bersih yang dapat digabungkan ke dalam branch utama aplikasi. Di sisi lain, integrasi dengan PaaS seperti Koyeb yang menggunakan Dockerfile memastikan bahwa aplikasi saya selalu ter-deploy dalam versi terbaru secara otomatis setelah lolos tahap pengujian. Hal ini menghilangkan proses manual yang rentan terhadap kesalahan manusia serta mempercepat waktu perilisan fitur baru ke lingkungan produksi. Secara keseluruhan, kombinasi alat-alat ini telah menciptakan pipa pengembangan yang efisien, transparan, dan memiliki keandalan tinggi
+
+## Reflection 3
+
+### 1. SOLID Principles Applied to the Project
+Dalam pengerjaan proyek ini, saya telah menerapkan kelima prinsip SOLID untuk meningkatkan kualitas, struktur, dan maintainability kode. Berikut adalah penjelasannya:
+
+* **Single Responsibility Principle (SRP):** Saya memisahkan `CarController` yang sebelumnya menyatu di dalam file `ProductController.java` menjadi filenya sendiri (`CarController.java`). Dengan ini, setiap controller memiliki satu tanggung jawab tunggal, `ProductController` hanya mengurus routing produk, dan `CarController` hanya mengurus routing mobil.
+* **Open-Closed Principle (OCP):** Saya memodifikasi metode `update` pada `CarRepository` dan `ProductRepository`. Tidak boleh melakukan *set* atribut satu per satu (`setName`, `setQuantity`, dll.), saya memperbarui data dengan langsung mengganti objek lama dengan objek baru di dalam `List`. Sehingga, jika sewaktu-waktu model ditambahkan atribut baru, saya tidak perlu lagi membongkar dan memodifikasi kode di dalam *repository*.
+* **Liskov Substitution Principle (LSP):** Saya menghapus relasi *inheritance* berupa `extends ProductController` pada `CarController`. Menghapus relasi ini memastikan tidak ada pewarisan rute yang tidak relevan yang bisa merusak perilaku aplikasi jika `CarController` diperlakukan sebagai `ProductController`.
+* **Interface Segregation Principle (ISP):** Saya memastikan bahwa antarmuka (`CarService` dan `ProductService`) hanya berisi metode-metode pokok (`create`, `findAll`, `findById`, `update`, `delete`) yang memang diimplementasikan sepenuhnya oleh kelas konkritnya.
+* **Dependency Inversion Principle (DIP):** Saya mengubah `ProductRepository` dan `CarRepository` yang awalnya berupa kelas konkrit menjadi sebuah *Interface*, lalu memindahkan logikanya ke dalam kelas implementasi (`ProductRepositoryImpl` dan `CarRepositoryImpl`). Dengan demikian, modul tingkat tinggi kini bergantung pada abstraksi (*interface*), bukan pada implementasi spesifik.
+
+### 2. Advantages of Applying SOLID Principles
+Menerapkan prinsip SOLID memberikan beberapa keuntungan besar pada proyek saya:
+
+* **Maintainability (Mudah Dipelihara):** Berkat **SRP**, kode menjadi jauh lebih rapi. Jika ada bug pada fitur mobil, saya tahu persis bahwa saya hanya perlu mencari masalahnya di `CarController` atau `CarRepository`, tanpa takut memengaruhi fitur produk secara tidak sengaja.
+* **Extensibility & Flexibility (Mudah Dikembangkan):** Dengan penerapan **DIP** dan **OCP**, aplikasi menjadi sangat fleksibel. Contohnya, saat ini data disimpan menggunakan memori sementara (`List`). Jika esok hari saya ingin menyimpan data ke database asli (seperti PostgreSQL), saya hanya perlu membuat kelas baru (misalnya `CarRepositoryPostgresImpl`) yang mengimplementasikan antarmuka `CarRepository` tanpa perlu mengubah kode di `CarService` atau `CarController` sama sekali.
+* **Readability (Mudah Dibaca):** Memecah kode menjadi antarmuka dan implementasi yang lebih kecil menghindari terciptanya "God Object" (satu kelas raksasa yang mengatur segalanya), sehingga kode lebih mudah dipahami oleh developer lain.
+
+### 3. Disadvantages of Not Applying SOLID Principles
+Jika prinsip SOLID diabaikan, proyek akan menghadapi beberapa kerugian signifikan:
+
+* **Tight Coupling (Ketergantungan yang Kuat):** Contoh dari pelanggaran **DIP** di awal proyek saya adalah `ProductServiceImpl` yang bergantung langsung pada kelas konkrit `ProductRepository`. Jika saya tidak memisahkannya menjadi *interface*, setiap kali ada perubahan cara penyimpanan data, saya terpaksa harus membongkar dan menulis ulang logika di level *Service* juga. Hal ini membuat aplikasi kaku (*rigid*).
+* **Fragility (Kode Rapuh dan Rentan Error):** Contoh pelanggaran **LSP** dan **SRP** sebelumnya di mana `CarController extends ProductController`. Jika saya tidak memperbaikinya, setiap kali saya memodifikasi alur routing di `ProductController`, routing milik `CarController` bisa ikut berubah atau rusak tanpa disadari.
+* **Sulit untuk Diuji (Hard to Test):** Tanpa adanya pemisahan *interface* (**DIP**), melakukan *Mocking* saat membuat *Unit Test* akan menjadi sangat sulit. Kita akan terpaksa melakukan pengujian pada implementasi database aslinya, bukan sekadar mengetes logika bisnisnya secara terisolasi.
